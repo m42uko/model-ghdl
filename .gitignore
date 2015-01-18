@@ -14,3 +14,4 @@
 
 # Qt
 *.pro.user
+build-*
