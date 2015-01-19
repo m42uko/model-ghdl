@@ -156,12 +156,11 @@ int main(int argc, char **argv) {
     }
     else {
         cargs = "";
-        // ./testb_file --stop-time=500ns --vcdgz=testb_file.vcdgz
-        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + getSimulationTime() + " --vcdgz=" + top + ".vcdgz")) {
+        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + getSimulationTime() + " --vcd=" + top + ".vcd")) {
             cerr << "Error: Simulation failed." << endl;
         }
         else {
-            if (run("gunzip --stdout " +  string(tempdir) + "/" + top + ".vcdgz | gtkwave --vcd")) {
+            if (run("gtkwave " +  string(tempdir) + "/" + top + ".vcd")) {
                 cerr << "Error: GtkWave failed.";
             }
         }
