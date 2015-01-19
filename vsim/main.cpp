@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <vector>
+#include <fstream>
 
 #define DEBUG_EN DEBUG_EN
 
@@ -43,10 +44,10 @@ int main(int argc, char **argv) {
     int i;
     char tempdir[256] = ""; // Compile dir
 
-    if (!getcwd(tempdir, sizeof(tempdir))) {
-        cerr << "Error getting current working dir!" << endl;
-        return 1;
-    }
+    ifstream myfile;
+    myfile.open ("/tmp/workdir-ghdl");
+    myfile.getline(tempdir, sizeof(tempdir));
+    myfile.close();
 
     for (i=1; i < argc; ++i) {
         if (ISOPT("-gui")) {
@@ -99,6 +100,7 @@ int main(int argc, char **argv) {
     }
 
     string cargs = "ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+
     if (!run(cargs)) {
         cerr << "Error: Compilation failed." << endl;
     }

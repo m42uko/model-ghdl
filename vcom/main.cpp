@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <vector>
+#include <fstream>
 //#include <regex>
 
 //#define DEBUG_EN DEBUG_EN
@@ -148,6 +149,13 @@ int main(int argc, char **argv)
         cerr << "Error: Incomplete/Unsupported vcom call." << endl;
         return 2;
     }
+
+    // Write temp path to /tmp
+    ofstream myfile;
+    myfile.open ("/tmp/workdir-ghdl");
+    myfile << tempdir;
+    myfile.flush();
+    myfile.close();
 
     string cargs = "ghdl -i --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
     string sargs = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
