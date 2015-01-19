@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 
     // Write temp path to /tmp
     ofstream myfile;
-    myfile.open ("/tmp/workdir-ghdl");
+    myfile.open ("/tmp/ghdl-workdir");
     myfile << tempdir;
     myfile.flush();
     myfile.close();

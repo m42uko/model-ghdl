@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     char tempdir[256] = ""; // Compile dir
 
     ifstream myfile;
-    myfile.open ("/tmp/workdir-ghdl");
+    myfile.open ("/tmp/ghdl-workdir");
     myfile.getline(tempdir, sizeof(tempdir));
     myfile.close();
 
