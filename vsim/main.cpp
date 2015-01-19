@@ -31,8 +31,43 @@ int run(string args) {
     while(fgets(buf, sizeof(buf), proc)!=NULL){
         cout << buf;
     }
-    pclose(proc);
-    return 0;
+
+    return pclose(proc);
+}
+
+string getSimulationTime() { // Very crude but works (for a proof-of-concept anyway^^)
+    FILE *proc;
+    char buf[512];
+    vector < string > result;
+    string defaultValue = "100ns";
+
+    string temp = "zenity --entry --text \"Enter the duration:\" --title \"Simulation time\" --entry-text=\"" + defaultValue + "\"";
+    proc = popen(temp.c_str(), "r");
+
+    if (proc == NULL) {
+        cerr << "Error: Could not invoke zenity." << endl;
+        return "";
+    }
+
+    while(fgets(buf, sizeof(buf), proc)!=NULL){
+        cout << buf;
+    }
+
+
+    defaultValue.clear();
+    char *ptr = buf;
+    while (*ptr != '\0' && *ptr != '\n') {
+        defaultValue.append(" ");
+        defaultValue[defaultValue.length()-1] = *ptr;
+        ptr++;
+    }
+
+    if (pclose(proc)) {
+        defaultValue = "";
+    }
+
+    cout << "TIM=" << defaultValue << endl;
+    return defaultValue;
 }
 
 #define ISOPT(cmd) (string(argv[i]) == cmd)
@@ -41,6 +76,7 @@ int run(string args) {
 int main(int argc, char **argv) {
     string top = "";
     string work = "";
+    string simtime = "";
     int i;
     char tempdir[256] = ""; // Compile dir
 
@@ -99,15 +135,15 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
 
+    string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
     if (run(cargs)) {
         cerr << "Error: Compilation failed." << endl;
     }
     else {
         cargs = "";
         // ./testb_file --stop-time=500ns --vcdgz=testb_file.vcdgz
-        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=500ns --vcdgz=" + top + ".vcdgz")) {
+        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + getSimulationTime() + " --vcdgz=" + top + ".vcdgz")) {
             cerr << "Error: Simulation failed." << endl;
         }
         else {
