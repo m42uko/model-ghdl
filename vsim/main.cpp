@@ -2,6 +2,7 @@
 #include <string>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 #include <fstream>
 
@@ -150,22 +151,36 @@ int main(int argc, char **argv) {
     }
 
 
-    string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
-    if (run(cargs)) {
-        cerr << "Error: Compilation failed." << endl;
-    }
-    else {
-        cargs = "";
-        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + getSimulationTime() + " --vcd=" + top + ".vcd")) {
-            cerr << "Error: Simulation failed." << endl;
+    //bool ex = false;
+    //while (!ex) {
+        string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+        if (run(cargs)) {
+            cerr << "Error: Compilation failed." << endl;
+            run("zenity --error --text \"Compilation failed.\"");
         }
         else {
-            if (run("gtkwave " +  string(tempdir) + "/" + top + ".vcd")) {
-                cerr << "Error: GtkWave failed.";
+            cargs = "";
+            string st = getSimulationTime();
+            if (st != "") {
+                if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + st + " --vcd=" + top + ".vcd")) {
+                    cerr << "Error: Simulation failed." << endl;
+                }
+                else {
+                    string wv = "gtkwave " + string(tempdir) + "/" + top + ".vcd &";
+                    if (run("pidof gtkwave")) {
+                        if (system(wv.c_str())) {
+                            cerr << "Error: GtkWave failed.";
+                        }
+                        else {
+                            cout << "GtkWave started." << endl;
+                        }
+                    }
+                }
             }
         }
-    }
+    //}
 
+    //cout << "Simulation ended." << endl;
     return 0;
 }
 
