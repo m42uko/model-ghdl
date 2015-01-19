@@ -99,16 +99,21 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    string cargs = "ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+    string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
 
-    if (!run(cargs)) {
+    if (run(cargs)) {
         cerr << "Error: Compilation failed." << endl;
     }
     else {
         cargs = "";
         // ./testb_file --stop-time=500ns --vcdgz=testb_file.vcdgz
-        if (run("./" + top + " --stop-time=500ns --vcdgz=" + top + ".vcdgz")) {
+        if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=500ns --vcdgz=" + top + ".vcdgz")) {
             cerr << "Error: Simulation failed." << endl;
+        }
+        else {
+            if (run("gunzip --stdout " +  string(tempdir) + "/" + top + ".vcdgz | gtkwave --vcd")) {
+                cerr << "Error: GtkWave failed.";
+            }
         }
     }
 
