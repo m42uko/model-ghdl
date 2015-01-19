@@ -7,6 +7,7 @@
 
 //#define DEBUG_EN DEBUG_EN
 
+
 /*
  *
 > /tmp/SigasiCompileCache822149657706169838/blink/vcom > /home/markus/Downloads/Libero/install/Model/modeltech/linuxacoem/vcom -2008 -work design -modelsimini /tmp/SigasiCompileCache822149657706169838/blink/vcom/modelsim.ini /home/markus/workspaceSigasi/blink/src/top.vhd
@@ -46,63 +47,12 @@ vars=`echo "$@" | sed "s/-work /-work=/g"`;
 
 using namespace std;
 
-#define ISOPT(cmd) (i < argc) && (string(argv[i]) == cmd)
+#define ISOPT(cmd) (string(argv[i]) == cmd)
+#define GETOPT(cmd) (string(argv[i]) == cmd) && (++i < argc)
 
-int main(int argc, char **argv)
-{
-    int i;
-    string work = ""; // Current library
-    string vhdl = ""; // Input VHDL files
-    char tempdir[256] = ""; // Compile dir
-    string args;
+int run(string args);
 
-    if (!getcwd(tempdir, sizeof(tempdir))) {
-        cerr << "Error getting current working dir!" << endl;
-        return 1;
-    }
-
-    for (i=1; i < argc; ++i) {
-        if (ISOPT("-work")) {
-            work = argv[i+1];
-            ++i;
-        }
-        else if (ISOPT("-2008")) {
-            cerr << "WARN: VHDL 2008 is not yet supported by GHDL." << endl;
-        }
-        else if (ISOPT("-modelsimini")) {
-            // Not used
-            ++i; // But skip param
-        }
-        else {
-            if (argv[i][0] == '-') {
-                cerr << "INFO: Unknown command line opt: " << argv[i] << endl;
-            }
-            else {
-                break; // Rest are VHDL input files
-            }
-        }
-    }
-
-    for (; i < argc; ++i) {
-        vhdl.append(argv[i]);
-        vhdl.append(" ");
-    }
-
-#ifdef DEBUG_EN
-    cout << "\n\nVCOM CALL PARSED:" << endl;
-    cout << "\twork=" << work << endl;
-    cout << "\tvhdl=" << vhdl << endl;
-    cout << "\ttempdir=" << tempdir << endl;
-#endif
-
-    if (work == "" || vhdl == "" || string(tempdir) == "") {
-        cerr << "Error: Incomplete/Unsupported vcom call." << endl;
-        return 2;
-    }
-    args = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
-
-
-    // Launch GHDL
+int run(string args) {
     FILE *proc;
     char buf[512];
     vector < string > result;
@@ -134,13 +84,78 @@ int main(int argc, char **argv)
         }
         result.push_back(temp);
 
-        // Regex extract! (Edit: Leave regex for later :D)
-        // target=** Error: /home/markus/workspaceSigasi/blink/src/top.vhd(32): (vcom-1136) Unknown identifier "counter_i2".
-        // source=/home/markus/workspaceSigasi/blink/src/top.vhd:32:19: no declaration for "counter_i2"
-        cout << "** Error: " << result[0] << "(" << result[1] << "):" << result[3];
+        if (result.size() == 4) {
+            cout << "** Error: " << result[0] << "(" << result[1] << "):" << result[3];
+        }
+        else {
+            cout << buf;
+        }
+    }
+    pclose(proc);
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    int i;
+    string work = ""; // Current library
+    string vhdl = ""; // Input VHDL files
+    char tempdir[256] = ""; // Compile dir
+
+    if (!getcwd(tempdir, sizeof(tempdir))) {
+        cerr << "Error getting current working dir!" << endl;
+        return 1;
     }
 
-    pclose(proc);
+    for (i=1; i < argc; ++i) {
+        if (GETOPT("-work")) {
+            work = argv[i];
+            //++i;
+        }
+        else if (ISOPT("-93")) {
+
+        }
+        else if (ISOPT("-2008")) {
+            cerr << "WARN: VHDL 2008 is not yet supported by GHDL." << endl;
+        }
+        else if (GETOPT("-modelsimini")) {
+            // Not used
+           // ++i; // But skip param
+        }
+        else {
+            if (argv[i][0] == '-') {
+                cerr << "INFO: Unknown command line opt: " << argv[i] << endl;
+            }
+            else {
+                break; // Rest are VHDL input files
+            }
+        }
+    }
+
+    for (; i < argc; ++i) {
+        vhdl.append(argv[i]);
+        vhdl.append(" ");
+    }
+
+#ifdef DEBUG_EN
+    cout << "\n\nVCOM CALL PARSED:" << endl;
+    cout << "\twork=" << work << endl;
+    cout << "\tvhdl=" << vhdl << endl;
+    cout << "\ttempdir=" << tempdir << endl;
+#endif
+
+    if (work == "" || vhdl == "" || string(tempdir) == "") {
+        cerr << "Error: Incomplete/Unsupported vcom call." << endl;
+        return 2;
+    }
+
+    string cargs = "ghdl -i --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+    string sargs = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+
+    // Launch GHDL
+    if (run(cargs) || run(sargs)) {
+        cerr << "** Error: Error in model-ghdl." << endl;
+    }
     return 0;
 }
 
