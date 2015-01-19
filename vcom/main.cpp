@@ -1,6 +1,11 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <stdio.h>
+#include <vector>
+//#include <regex>
+
+//#define DEBUG_EN DEBUG_EN
 
 /*
  *
@@ -49,8 +54,12 @@ int main(int argc, char **argv)
     string work = ""; // Current library
     string vhdl = ""; // Input VHDL files
     char tempdir[256] = ""; // Compile dir
+    string args;
 
-    getcwd(tempdir, sizeof(tempdir));
+    if (!getcwd(tempdir, sizeof(tempdir))) {
+        cerr << "Error getting current working dir!" << endl;
+        return 1;
+    }
 
     for (i=1; i < argc; ++i) {
         if (ISOPT("-work")) {
@@ -79,18 +88,59 @@ int main(int argc, char **argv)
         vhdl.append(" ");
     }
 
-
-    cout << "\n\nVHDL SOURCE DETECTED:" << endl;
+#ifdef DEBUG_EN
+    cout << "\n\nVCOM CALL PARSED:" << endl;
     cout << "\twork=" << work << endl;
     cout << "\tvhdl=" << vhdl << endl;
     cout << "\ttempdir=" << tempdir << endl;
+#endif
 
-    cout << "\n\nCALLING GHDL for syntax checking:" << endl;
+    if (work == "" || vhdl == "" || string(tempdir) == "") {
+        cerr << "Error: Incomplete/Unsupported vcom call." << endl;
+        return 2;
+    }
+    args = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
 
-    string args;
-    args = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl;
 
-    cout << "\t" << args << endl;
+    // Launch GHDL
+    FILE *proc;
+    char buf[512];
+    vector < string > result;
+
+    proc = popen(args.c_str(), "r");
+
+    if (proc == NULL) {
+        cerr << "Error: Could not invoke GHDL." << endl;
+        return 1;
+    }
+
+    while(fgets(buf, sizeof(buf), proc)!=NULL){
+        //cout << buf;
+        string temp = "";
+        char *ptr = buf;
+
+        result.clear();
+
+        while (*ptr != '\0') {
+            if (*ptr == ':' || *ptr == '\0') {
+                result.push_back(temp);
+                temp = "";
+            }
+            else {
+                temp.append(" ");
+                temp[temp.length()-1] = *ptr;
+            }
+            ptr++;
+        }
+        result.push_back(temp);
+
+        // Regex extract! (Edit: Leave regex for later :D)
+        // target=** Error: /home/markus/workspaceSigasi/blink/src/top.vhd(32): (vcom-1136) Unknown identifier "counter_i2".
+        // source=/home/markus/workspaceSigasi/blink/src/top.vhd:32:19: no declaration for "counter_i2"
+        cout << "** Error: " << result[0] << "(" << result[1] << "):" << result[3];
+    }
+
+    pclose(proc);
     return 0;
 }
 
