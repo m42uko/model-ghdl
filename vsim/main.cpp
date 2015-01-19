@@ -41,6 +41,14 @@ string getSimulationTime() { // Very crude but works (for a proof-of-concept any
     vector < string > result;
     string defaultValue = "100ns";
 
+    ifstream myfile;
+    char fileTemp[128];
+    myfile.open ("/tmp/ghdl-simtime");
+    myfile.getline(fileTemp, sizeof(fileTemp));
+    myfile.close();
+    if (string(fileTemp) != "")
+        defaultValue = string(fileTemp);
+
     string temp = "zenity --entry --text \"Enter the duration:\" --title \"Simulation time\" --entry-text=\"" + defaultValue + "\"";
     proc = popen(temp.c_str(), "r");
 
@@ -65,8 +73,14 @@ string getSimulationTime() { // Very crude but works (for a proof-of-concept any
     if (pclose(proc)) {
         defaultValue = "";
     }
+    else {
+        ofstream myfile;
+        myfile.open ("/tmp/ghdl-simtime");
+        myfile << defaultValue;
+        myfile.flush();
+        myfile.close();
+    }
 
-    cout << "TIM=" << defaultValue << endl;
     return defaultValue;
 }
 
