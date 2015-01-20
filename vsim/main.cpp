@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 
-#define DEBUG_EN DEBUG_EN
+//#define DEBUG_EN DEBUG_EN
 
 using namespace std;
 
@@ -153,19 +153,23 @@ int main(int argc, char **argv) {
 
     //bool ex = false;
     //while (!ex) {
-        string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+        cout << "Compiling..." << endl;
+        string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic -fexplicit --workdir=" + string(tempdir) + " --work=" + work + " " + top;
         if (run(cargs)) {
             cerr << "Error: Compilation failed." << endl;
             run("zenity --error --text \"Compilation failed.\"");
         }
         else {
+            cout << "done." << endl;
             cargs = "";
             string st = getSimulationTime();
             if (st != "") {
+                cout << "Simulating..." << endl;
                 if (run("cd " + string(tempdir) + "; ./" + top + " --stop-time=" + st + " --vcd=" + top + ".vcd")) {
                     cerr << "Error: Simulation failed." << endl;
                 }
                 else {
+                    cout << "==> All done!" << endl;
                     string wv = "gtkwave " + string(tempdir) + "/" + top + ".vcd &";
                     if (run("pidof gtkwave")) {
                         if (system(wv.c_str())) {
