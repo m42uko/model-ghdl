@@ -101,6 +101,8 @@ int main(int argc, char **argv)
     int i;
     string work = ""; // Current library
     string vhdl = ""; // Input VHDL files
+    string vhdlver = ""; // VHDL Version
+    string ghdlargs = ""; // Additional GHDL parameters
     char tempdir[256] = ""; // Compile dir
 
     if (!getcwd(tempdir, sizeof(tempdir))) {
@@ -113,11 +115,27 @@ int main(int argc, char **argv)
             work = argv[i];
             //++i;
         }
+        else if (ISOPT("-87")) {
+            vhdlver = "--std=87";
+        }
         else if (ISOPT("-93")) {
-
+            vhdlver = "--std=93";
+        }
+        else if (ISOPT("-93c")) {
+            vhdlver = "--std=93c";
+        }
+        else if (ISOPT("-2000")) {
+            vhdlver = "--std=00";
+        }
+        else if (ISOPT("-2002")) {
+            vhdlver = "--std=02";
         }
         else if (ISOPT("-2008")) {
-            cerr << "WARN: VHDL 2008 is not yet supported by GHDL." << endl;
+            cerr << "WARN: VHDL 2008 is not yet fully supported by GHDL." << endl;
+            vhdlver = "--std=08";
+        }
+        else if (GETOPT("-ghdl")) {
+            ghdlargs = argv[i];
         }
         else if (GETOPT("-modelsimini")) {
             // Not used
@@ -157,8 +175,8 @@ int main(int argc, char **argv)
     myfile.flush();
     myfile.close();
 
-    string cargs = "ghdl -i --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
-    string sargs = "ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+    string cargs = "ghdl -i --ieee=synopsys " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+    string sargs = "ghdl -s --ieee=synopsys " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
 
     // Launch GHDL
     if (run(cargs) || run(sargs)) {
