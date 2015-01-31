@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <vector>
 #include <fstream>
-//#include <regex>
+#include <string.h>
 
-//#define DEBUG_EN DEBUG_EN
+// #define DEBUG_EN DEBUG_EN
 
 
 /*
@@ -114,6 +114,9 @@ int main(int argc, char **argv)
         if (GETOPT("-work")) {
             work = argv[i];
             //++i;
+        }
+        else if (GETOPT("-compiledir")) {
+            strcpy(tempdir, argv[i]);
         }
         else if (ISOPT("-87")) {
             vhdlver = "--std=87";
