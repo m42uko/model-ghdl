@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string.h>
 
-#define DEBUG_EN DEBUG_EN
+// #define DEBUG_EN DEBUG_EN
 
 using namespace std;
 
@@ -112,7 +112,6 @@ int main(int argc, char **argv) {
         }
         else if (GETOPT("-ghdl")) {
             ghdlargs = argv[i];
-            cerr << "GHDARGS=" << argv[i];
         }
         else if (GETOPT("-gtkwave")) {
             wvargs = argv[i];
