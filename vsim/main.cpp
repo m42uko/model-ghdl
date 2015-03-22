@@ -112,6 +112,7 @@ int main(int argc, char **argv) {
         }
         else if (GETOPT("-ghdl")) {
             ghdlargs = argv[i];
+            cerr << "GHDARGS=" << argv[i];
         }
         else if (GETOPT("-gtkwave")) {
             wvargs = argv[i];
@@ -121,14 +122,10 @@ int main(int argc, char **argv) {
                 cerr << "INFO: Unknown command line opt: " << argv[i] << endl;
             }
             else {
-                break;
+                top.append(argv[i]);
+                top.append(" ");
             }
         }
-    }
-
-    for (; i < argc; ++i) {
-        top.append(argv[i]);
-        top.append(" ");
     }
 
 

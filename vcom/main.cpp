@@ -149,14 +149,10 @@ int main(int argc, char **argv)
                 cerr << "INFO: Unknown command line opt: " << argv[i] << endl;
             }
             else {
-                break; // Rest are VHDL input files
+                vhdl.append(argv[i]);
+                vhdl.append(" ");
             }
         }
-    }
-
-    for (; i < argc; ++i) {
-        vhdl.append(argv[i]);
-        vhdl.append(" ");
     }
 
 #ifdef DEBUG_EN
