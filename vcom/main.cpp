@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string.h>
 
-// #define DEBUG_EN DEBUG_EN
+ #define DEBUG_EN DEBUG_EN
 
 
 /*
@@ -29,13 +29,13 @@ Errors: 2, Warnings: 0
 
 
 COMPILATION:
-> ghdl -i --ieee=synopsys --warn-no-vital-generic --workdir=. --work=design ../blink/src/ *.vhd
-> ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=. --work=work top
+> ghdl -i --warn-no-vital-generic --workdir=. --work=design ../blink/src/ *.vhd
+> ghdl -m --warn-no-vital-generic --workdir=. --work=work top
 ../blink/src/top.vhd:32:19: no declaration for "counter_i2"
 
 
 SYNTAX CHECKING:
-> ghdl -s --ieee=synopsys --warn-no-vital-generic --workdir=. --work=design ../blink/src/ *.vhd
+> ghdl -s --warn-no-vital-generic --workdir=. --work=design ../blink/src/ *.vhd
 ../blink/src/top.vhd:32:19: no declaration for "counter_i2"
 
 
@@ -178,9 +178,13 @@ int main(int argc, char **argv)
     myfile.flush();
     myfile.close();
 
-    string cargs = "ghdl -i --ieee=synopsys " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
-    string sargs = "ghdl -s --ieee=synopsys " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+    string cargs = "ghdl -i " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
+    string sargs = "ghdl -s " + vhdlver + " --warn-no-vital-generic " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + vhdl + " 2>&1";
 
+#ifdef DEBUG_EN
+    cout  << "RUN: " << cargs << endl;
+    cout  << "RUN: " << sargs << endl;
+#endif
     // Launch GHDL
     if (run(cargs) || run(sargs)) {
         cerr << "** Error: Error in model-ghdl." << endl;

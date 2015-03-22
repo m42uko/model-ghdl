@@ -7,12 +7,12 @@
 #include <fstream>
 #include <string.h>
 
-// #define DEBUG_EN DEBUG_EN
+#define DEBUG_EN DEBUG_EN
 
 using namespace std;
 
 // Source: vsim -gui design.top(RTL)
-// Target: ghdl -m --ieee=synopsys --warn-no-vital-generic --workdir=simu --work=work testb_file
+// Target: ghdl -m --warn-no-vital-generic --workdir=simu --work=work testb_file
 //         ./testb_file --stop-time=500ns --vcdgz=testb_file.vcdgz
 //         gunzip --stdout testb_file.vcdgz | gtkwave --vcd
 
@@ -166,7 +166,10 @@ int main(int argc, char **argv) {
     //bool ex = false;
     //while (!ex) {
         cout << "Compiling..." << endl;
-        string cargs = "cd " + string(tempdir) + "; ghdl -m --ieee=synopsys --warn-no-vital-generic " + ghdlargs + " -fexplicit --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+        string cargs = "cd " + string(tempdir) + "; ghdl -m --warn-no-vital-generic " + ghdlargs + " -fexplicit --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+#ifdef DEBUG_EN
+    cout  << "RUN: " << cargs << endl;
+#endif
         if (run(cargs)) {
             cerr << "Error: Compilation failed." << endl;
             run("zenity --error --text \"Compilation failed.\"");
@@ -177,6 +180,9 @@ int main(int argc, char **argv) {
             string st = getSimulationTime();
             if (st != "") {
                 cout << "Simulating..." << endl;
+#ifdef DEBUG_EN
+    cout  << "RUN: " << "cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --vcd=" + top + ".vcd" << endl;
+#endif
                 if (run("cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --vcd=" + top + ".vcd")) {
                     cerr << "Error: Simulation failed." << endl;
                 }
