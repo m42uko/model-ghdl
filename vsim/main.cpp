@@ -90,12 +90,13 @@ string getSimulationTime() { // Very crude but works (for a proof-of-concept any
 #define GETOPT(cmd) (string(argv[i]) == cmd) && (++i < argc)
 
 int main(int argc, char **argv) {
-    string top = "";
-    string work = "";
-    string simtime = "";
+    string top      = "";
+    string work     = "";
+    string simtime  = "";
     string ghdlargs = "";
-    string wvargs = "";
-    string gtkargs = "";
+    string wvargs   = "";
+    string gtkargs  = "";
+    string gtksave  = "";
     int i;
     char tempdir[256] = ""; // Compile dir
 
@@ -119,6 +120,9 @@ int main(int argc, char **argv) {
         }
         else if (GETOPT("-gtkwave")) {
             gtkargs = argv[i];
+        }
+        else if (GETOPT("-gtksave")) {
+            gtksave = argv[i];
         }
         else {
             if (argv[i][0] == '-') {
@@ -188,6 +192,9 @@ int main(int argc, char **argv) {
                 }
                 else {
                     cout << "==> All done!" << endl;
+                    if (gtksave != "") {
+                        gtkargs += " --save=\"" + gtksave + "/" + top + ".gtkw\"";
+                    }
                     string wv = "gtkwave " + string(tempdir) + "/" + top + ".ghw " + gtkargs + " &";
                     if (run("pidof gtkwave")) {
                         if (system(wv.c_str())) {
