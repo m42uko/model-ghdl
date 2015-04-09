@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
     string simtime = "";
     string ghdlargs = "";
     string wvargs = "";
+    string gtkargs = "";
     int i;
     char tempdir[256] = ""; // Compile dir
 
@@ -113,8 +114,11 @@ int main(int argc, char **argv) {
         else if (GETOPT("-ghdl")) {
             ghdlargs = argv[i];
         }
-        else if (GETOPT("-gtkwave")) {
+        else if (GETOPT("-rargs")) {
             wvargs = argv[i];
+        }
+        else if (GETOPT("-gtkwave")) {
+            gtkargs = argv[i];
         }
         else {
             if (argv[i][0] == '-') {
@@ -184,7 +188,7 @@ int main(int argc, char **argv) {
                 }
                 else {
                     cout << "==> All done!" << endl;
-                    string wv = "gtkwave " + string(tempdir) + "/" + top + ".ghw &";
+                    string wv = "gtkwave " + string(tempdir) + "/" + top + ".ghw " + gtkargs + " &";
                     if (run("pidof gtkwave")) {
                         if (system(wv.c_str())) {
                             cerr << "Error: GtkWave failed.";
