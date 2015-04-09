@@ -177,14 +177,14 @@ int main(int argc, char **argv) {
             if (st != "") {
                 cout << "Simulating..." << endl;
 #ifdef DEBUG_EN
-    cout  << "RUN: " << "cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --vcd=" + top + ".vcd" << endl;
+    cout  << "RUN: " << "cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --wave=" + top + ".ghw" << endl;
 #endif
-                if (run("cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --vcd=" + top + ".vcd")) {
+                if (run("cd " + string(tempdir) + "; ./" + top + " " + wvargs + " --stop-time=" + st + " --wave=" + top + ".ghw")) {
                     cerr << "Error: Simulation failed." << endl;
                 }
                 else {
                     cout << "==> All done!" << endl;
-                    string wv = "gtkwave " + string(tempdir) + "/" + top + ".vcd &";
+                    string wv = "gtkwave " + string(tempdir) + "/" + top + ".ghw &";
                     if (run("pidof gtkwave")) {
                         if (system(wv.c_str())) {
                             cerr << "Error: GtkWave failed.";
