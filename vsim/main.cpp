@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string.h>
 
-// #define DEBUG_EN DEBUG_EN
+ #define DEBUG_EN DEBUG_EN
 
 using namespace std;
 
@@ -139,6 +139,9 @@ int main(int argc, char **argv) {
     // -gui work.toplevel(RTL)
     string temp = "";
     for (unsigned int i=0; i < top.length(); ++i) {
+        if (top.at(i) >= 'A' && top.at(i) <= 'Z')
+            top.at(i) = top.at(i) - ('A'-'a'); // convert to lower case
+
         if (top.at(i) == '.') {
             work = temp;
             temp = "";
