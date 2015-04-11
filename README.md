@@ -8,4 +8,4 @@ Add the following arguments in Sigasi:
 
 ### vsim
 * ```-ghdl "--std=08"``` to enable VHDL 2008 support (if any problems occur)
-* ```-gtkwave "--save=/path/to/your/savefile"``` to automatically load a specific wave layout
+* ```-gtksave "/path/to/your/gtkw-directory"``` to automatically load a specific wave layout (```<path>/<top_entity.gtkw>```)
