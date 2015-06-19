@@ -138,7 +138,7 @@ int main(int argc, char **argv)
             vhdlver = "--std=08";
         }
         else if (GETOPT("-ghdl")) {
-            ghdlargs = argv[i];
+            ghdlargs += string(argv[i]) + " ";
         }
         else if (GETOPT("-modelsimini")) {
             // Not used

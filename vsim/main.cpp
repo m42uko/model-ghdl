@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
     string wvargs   = "";
     string gtkargs  = "";
     string gtksave  = "";
+    string vhdlver = ""; // VHDL Version
     int i;
     char tempdir[256] = ""; // Compile dir
 
@@ -112,8 +113,27 @@ int main(int argc, char **argv) {
         else if (GETOPT("-compiledir")) {
             strcpy(tempdir, argv[i]);
         }
+        else if (ISOPT("-87")) {
+            vhdlver = "--std=87";
+        }
+        else if (ISOPT("-93")) {
+            vhdlver = "--std=93";
+        }
+        else if (ISOPT("-93c")) {
+            vhdlver = "--std=93c";
+        }
+        else if (ISOPT("-2000")) {
+            vhdlver = "--std=00";
+        }
+        else if (ISOPT("-2002")) {
+            vhdlver = "--std=02";
+        }
+        else if (ISOPT("-2008")) {
+            cerr << "WARN: VHDL 2008 is not yet fully supported by GHDL." << endl;
+            vhdlver = "--std=08";
+        }
         else if (GETOPT("-ghdl")) {
-            ghdlargs = argv[i];
+            ghdlargs += string(argv[i]) + " ";
         }
         else if (GETOPT("-rargs")) {
             wvargs = argv[i];
@@ -173,7 +193,7 @@ int main(int argc, char **argv) {
     //bool ex = false;
     //while (!ex) {
         cout << "Compiling..." << endl;
-        string cargs = "cd " + string(tempdir) + "; ghdl -m --warn-no-vital-generic " + ghdlargs + " -fexplicit --workdir=" + string(tempdir) + " --work=" + work + " " + top;
+        string cargs = "cd " + string(tempdir) + "; ghdl -m " + vhdlver + " " + ghdlargs + " --workdir=" + string(tempdir) + " --work=" + work + " " + top;
 #ifdef DEBUG_EN
     cout  << "RUN: " << cargs << endl;
 #endif
