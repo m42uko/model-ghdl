@@ -15,3 +15,5 @@
 # Qt
 *.pro.user
 build-*
+*.txt.user
+
