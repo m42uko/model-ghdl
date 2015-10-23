@@ -83,7 +83,44 @@ int vsim(int argc, char **argv)
 {
     int ret;
     char *text = NULL;
+    char *work = NULL;
+    char *toplevel = NULL;
 
+    int i;
+    char *ptr = NULL;
+    char *lastPtr;
+
+    // -gui work.toplevel(RTL)
+    for (i=1; i < argc; ++i) {
+        if (GETOPT("-gui")) {
+            append_string(&ptr, argv[i]);
+            lastPtr = ptr;
+            for (; *ptr != 0; ptr++) {
+                if (*ptr >= 'A' && *ptr <= 'Z')
+                    *ptr = *ptr - ('A'-'a'); // convert to lower case
+
+                if (*ptr == '.') {
+                    *ptr++ = 0;
+                    work = lastPtr;
+                    lastPtr = ptr;
+                }
+                else if (*ptr == '(') {
+                    *ptr++ = 0;
+                    toplevel = lastPtr;
+                    lastPtr = ptr;
+                }
+            }
+            // free(ptr); DO NOT FREE, we still need it.
+            // ptr = NULL;
+        }
+    }
+
+
+
+    // After exec
+    free(ptr);
+
+    return 0; // DEBUG
     gui_init(&argc, &argv);
     ret = showMessage(0, "Enter the simulation time: ", "100 ns", &text);
     printf("%d: %p: %s\n", ret, text, text);
