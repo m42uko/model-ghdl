@@ -40,7 +40,7 @@ int run_ghdl(char *command, ...) {
     va_end(argptr);
 
     printf("RUN: %s\n", cmd);
-        proc = popen(cmd, "r");
+    proc = popen(cmd, "r");
 
     if (proc == NULL) {
         printf("Error: Could not invoke GHDL/GtkWave.\n");
@@ -90,11 +90,13 @@ int vcom(int argc, char **argv)
 {
     int i;
     int slen = 0;
-    char tempdir[1 K];
+    char workdir[1 K];
+    char *params = NULL;
     char *work;
     char *files = NULL;
+    char vhdlver[16] = "";
 
-    if (!getcwd(tempdir, sizeof(tempdir))) { // Default compile dir is cwd
+    if (!getcwd(workdir, sizeof(workdir))) { // Default compile dir is cwd
         fprintf(stderr, "Error: Could not invoke GHDL!\n");
         return 1;
     }
@@ -103,8 +105,29 @@ int vcom(int argc, char **argv)
         if (GETOPT("-work")) {
             work = argv[i];
         }
-        else if (GETOPT("-compiledir")) {
-            strcpy(tempdir, argv[i]);
+        else if (GETOPT("-workdir")) {
+            strcpy(workdir, argv[i]);
+        }
+        else if (ISOPT("-87")) {
+            strcpy(vhdlver, "--std=87");
+        }
+        else if (ISOPT("-93")) {
+            strcpy(vhdlver, "--std=93");
+        }
+        else if (ISOPT("-93c")) {
+            strcpy(vhdlver, "--std=93c");
+        }
+        else if (ISOPT("-2000")) {
+            strcpy(vhdlver, "--std=00");
+        }
+        else if (ISOPT("-2002")) {
+            strcpy(vhdlver, "--std=02");
+        }
+        else if (ISOPT("-2008")) {
+            strcpy(vhdlver, "--std=08");
+        }
+        else if (GETOPT("-ghdl")) {
+            append_string(&params, argv[i]);
         }
         else if (argv[i][0] != '-'){ // VHDL file
             slen += strlen(argv[i]) + 1;
@@ -114,9 +137,13 @@ int vcom(int argc, char **argv)
         }
     }
 
-    run_ghdl("ghdl -s %s 2>&1", files);
+    if (!params)
+        append_string(&params, "");
 
-
+    run_ghdl("ghdl -i --work=%s --workdir=%s %s %s %s 2>&1",
+             work, workdir, vhdlver, files, params);
+    run_ghdl("ghdl -s --work=%s --workdir=%s %s %s %s 2>&1",
+             work, workdir, vhdlver, files, params);
     free(files);
 
     printf("DONE.\n");
