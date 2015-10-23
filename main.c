@@ -89,10 +89,37 @@ int vsim(int argc, char **argv)
     int i;
     char *ptr = NULL;
     char *lastPtr;
+    char workdir[1 K];
+    char *params = NULL;
+    char *simtime = NULL;
 
+    FILE *fp;
+
+    gui_init(&argc, &argv);
+
+    fp = fopen("/tmp/model-ghdl-vsim","r");
+    if (fp) {
+        fgets(workdir, sizeof(workdir), fp); // lets (ab)use the workdir variable here
+        append_string(&simtime, workdir);
+        fclose(fp);
+    }
+    else {
+        append_string(&simtime, "100ns");
+    }
+
+    fp = fopen("/tmp/model-ghdl-vcom","r");
+    if (fp) {
+        fgets(workdir, sizeof(workdir), fp);
+        fclose(fp);
+    }
+    else {
+        printf("[E] Could not read temp file /tmp/model-ghdl-vcom! Aborting...");
+    }
+
+    printf ("[I] Emulating vsim.\n");
     // -gui work.toplevel(RTL)
     for (i=1; i < argc; ++i) {
-        if (GETOPT("-gui")) {
+        if (ptr == NULL && GETOPT("-gui")) { // only allow once
             append_string(&ptr, argv[i]);
             lastPtr = ptr;
             for (; *ptr != 0; ptr++) {
@@ -113,17 +140,42 @@ int vsim(int argc, char **argv)
             // free(ptr); DO NOT FREE, we still need it.
             // ptr = NULL;
         }
+        else if (GETOPT("-ghdl")) {
+            append_string(&params, " ");
+            append_string(&params, argv[i]);
+        }
+        else {
+
+        }
     }
 
+    chdir(workdir);
 
+    printf("Compiling...\n");
+    if (run_ghdl("ghdl -m --work=%s --workdir=\"%s\" %s %s", work, workdir, params, toplevel)) {
+        fprintf(stderr, "[E] Compilation failed!");
+        showMessage(MESSAGE_ERROR, "Error! Compilation failed.", NULL, NULL);
+    }
+    else {
+        if (ret = showMessage(MESSAGE_INPUT, "Enter the simulation time: ", simtime, &text)) {
+            free(simtime);
+            simtime = NULL;
+            append_string(&simtime, text);
+            fp = fopen("/tmp/model-ghdl-vsim","w");
+            if (fp) {
+                fprintf(fp, "%s", simtime);
+                fclose(fp);
+            }
+            printf("Simulating...\n");
+            // TODO: Exec program
+            // TODO: Exec GtkWave
+        }
+        return 0;
+    }
 
-    // After exec
-    free(ptr);
+    free(ptr); // Now we can free it
 
-    return 0; // DEBUG
-    gui_init(&argc, &argv);
-    ret = showMessage(0, "Enter the simulation time: ", "100 ns", &text);
-    printf("%d: %p: %s\n", ret, text, text);
+    return 255;
 }
 
 int vcom(int argc, char **argv)
@@ -132,9 +184,12 @@ int vcom(int argc, char **argv)
     int slen = 0;
     char workdir[1 K];
     char *params = NULL;
-    char *work;
+    char *work = NULL;
     char *files = NULL;
     char vhdlver[16] = "";
+    FILE *fp = NULL;
+
+    printf ("[I] Emulating vsim.\n");
 
     if (!getcwd(workdir, sizeof(workdir))) { // Default compile dir is cwd
         fprintf(stderr, "Error: Could not invoke GHDL!\n");
@@ -179,14 +234,34 @@ int vcom(int argc, char **argv)
 
     if (!params)
         append_string(&params, "");
+    if (!work)
+        append_string(&work, "work");
+
+    if (!files) {
+        fprintf(stderr, "[E] No input files specified.\n");
+        return 2;
+    }
+
+    // Info for vsim later on
+    fp = fopen("/tmp/model-ghdl-vcom","w");
+    if (fp) {
+        fprintf(fp, "%s", workdir);
+        fclose(fp);
+    }
+    else {
+        printf("Could not create temp file /tmp/model-ghdl-vcom! Ignoring...");
+    }
 
     run_ghdl("ghdl -i --work=%s --workdir=%s %s %s %s 2>&1",
              work, workdir, vhdlver, files, params);
     run_ghdl("ghdl -s --work=%s --workdir=%s %s %s %s 2>&1",
              work, workdir, vhdlver, files, params);
+
+
     free(files);
 
     printf("DONE.\n");
+    return 0;
 }
 
 
@@ -208,6 +283,7 @@ char* append_string(char **dest, const char *src) {
 int main(int argc, char **argv)
 {
     int app;
+
     printf ("model-ghdl revision %s, compiled on %s.\n", PROGRAM_REVISION, __DATE__);
 
     app = get_application(argv[0]);
@@ -233,7 +309,7 @@ int get_application(const char *call) {
         return PROG_VCOM;
     }
     else if (strcmp(pos, "vsim") == 0) {
-        return PROG_VCOM;
+        return PROG_VSIM;
     }
     else if (strcmp(pos, "vlib") == 0) {
         return PROG_VLIB;
