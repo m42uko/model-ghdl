@@ -8,6 +8,9 @@
 
 #define PROG_VCOM 0
 #define PROG_VSIM 1
+#define PROG_VLIB 2
+#define PROG_VMAP 3
+#define PROG_VDEL 4
 #define PROG_UNKNOWN 255
 
 #define K *1024
@@ -178,6 +181,9 @@ int main(int argc, char **argv)
     else if (app == PROG_VSIM) {
         return vsim(argc, argv);
     }
+    else if (app == PROG_VMAP || app == PROG_VLIB || app == PROG_VDEL) {
+        return 0;
+    }
 
     return 255;
 }
@@ -191,6 +197,15 @@ int get_application(const char *call) {
     }
     else if (strcmp(pos, "vsim") == 0) {
         return PROG_VCOM;
+    }
+    else if (strcmp(pos, "vlib") == 0) {
+        return PROG_VLIB;
+    }
+    else if (strcmp(pos, "vmap") == 0) {
+        return PROG_VMAP;
+    }
+    else if (strcmp(pos, "vdel") == 0) {
+        return PROG_VDEL;
     }
     else {
         fprintf(stderr, "[E] Program not recognized: %s\n", pos);
