@@ -182,7 +182,7 @@ int run_gtkwave(char *toplevel, char *command, ...) {
         vsprintf(cmd, command, argptr);
         va_end(argptr);
 
-        //printf("RUN_SIM: %s\n", cmd);
+        printf("RUN_SIM: %s\n", cmd);
 
         pid = system2(cmd, NULL, NULL);
         //printf("--> PID=%d\n", pid);
@@ -208,11 +208,13 @@ int vsim(int argc, char **argv)
     char *text = NULL;
     char *work = NULL;
     char *toplevel = NULL;
+    char *gtkwPrefix = NULL;
 
     int i;
     char *ptr = NULL;
     char *lastPtr;
     char workdir[1 K];
+    char sourcedir[1 K];
     char *params = NULL;
     char *simtime = NULL;
 
@@ -221,6 +223,11 @@ int vsim(int argc, char **argv)
     append_string(&params,"");
 
     gui_init(&argc, &argv);
+
+    if (!getcwd(sourcedir, sizeof(sourcedir))) { // Default compile dir is cwd
+        sourcedir[0] = 0;
+        printf("[W] Could not get cwd!\n");
+    }
 
     fp = fopen("/tmp/model-ghdl-vsim","r");
     if (fp) {
@@ -269,12 +276,19 @@ int vsim(int argc, char **argv)
             append_string(&params, " ");
             append_string(&params, argv[i]);
         }
+        else if (GETOPT("-gtkwprefix")) {
+            gtkwPrefix = argv[i];
+        }
         else {
 
         }
     }
 
     chdir(workdir);
+
+    if (gtkwPrefix == NULL) {
+        append_string(&gtkwPrefix, "");
+    }
 
     printf("[I] Compiling...\n");
     if (run_ghdl("ghdl -m --work=%s --workdir=\"%s\" %s %s", work, workdir, params, toplevel)) {
@@ -298,7 +312,7 @@ int vsim(int argc, char **argv)
                 showMessage(MESSAGE_ERROR, "Error! Simulation failed.", NULL, NULL);
             }
             else {
-                if (run_gtkwave(toplevel, "gtkwave %s/%s.ghw --save=\"%s.gtkw\"", workdir, toplevel, toplevel)) { // TODO: PATH FOR Savefile
+                if (run_gtkwave(toplevel, "gtkwave %s/%s.ghw --save=\"%s/%s%s.gtkw\"", workdir, toplevel, sourcedir, gtkwPrefix, toplevel)) { // TODO: PATH FOR Savefile
                     fprintf(stderr, "[E] Could not open GtkWave!");
                     showMessage(MESSAGE_ERROR, "Error! Could not open GtkWave!", NULL, NULL);
                 }
@@ -323,10 +337,10 @@ int vcom(int argc, char **argv)
     char vhdlver[16] = "";
     FILE *fp = NULL;
 
-    printf ("[I] Emulating vsim.\n");
+    printf ("[I] Emulating vcom.\n");
 
     if (!getcwd(workdir, sizeof(workdir))) { // Default compile dir is cwd
-        fprintf(stderr, "Error: Could not invoke GHDL!\n");
+        fprintf(stderr, "[E] Could not get cwd!\n");
         return 1;
     }
 
