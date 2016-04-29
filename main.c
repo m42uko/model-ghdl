@@ -370,6 +370,7 @@ int vcom(int argc, char **argv)
             strcpy(vhdlver, "--std=08");
         }
         else if (GETOPT("-ghdl")) {
+            append_string(&params, " ");
             append_string(&params, argv[i]);
         }
         else if (argv[i][0] != '-'){ // VHDL file
