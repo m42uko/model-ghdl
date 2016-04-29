@@ -88,7 +88,7 @@ int run_ghdl(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    printf("RUN_GHDL: %s\n", cmd);
+    //printf("RUN_GHDL: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -135,7 +135,7 @@ int run_simulation(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    printf("RUN_SIM: %s\n", cmd);
+    //printf("RUN_SIM: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -169,9 +169,9 @@ int run_gtkwave(char *toplevel, char *command, ...) {
         if (kill(pid, 0)) { // Check if the process still lives
             pid = -1;
         }
-        else {
+        /*else {
             printf("GtkWave is already running.\n");
-        }
+        }*/
     }
     else {
         pid = -1;
@@ -182,10 +182,10 @@ int run_gtkwave(char *toplevel, char *command, ...) {
         vsprintf(cmd, command, argptr);
         va_end(argptr);
 
-        printf("RUN_SIM: %s\n", cmd);
+        //printf("RUN_SIM: %s\n", cmd);
 
         pid = system2(cmd, NULL, NULL);
-        printf("--> PID=%d\n", pid);
+        //printf("--> PID=%d\n", pid);
 
         // Prevent gtkw from starting again each time
         fp = fopen(lockpath,"w");
@@ -194,7 +194,7 @@ int run_gtkwave(char *toplevel, char *command, ...) {
             fclose(fp);
         }
         else {
-            printf("Could not create temp file /tmp/model-ghdl-vcom! Ignoring...");
+            printf("[W] Could not create temp file %s! Ignoring...", lockpath);
         }
     }
 
@@ -276,7 +276,7 @@ int vsim(int argc, char **argv)
 
     chdir(workdir);
 
-    printf("Compiling...\n");
+    printf("[I] Compiling...\n");
     if (run_ghdl("ghdl -m --work=%s --workdir=\"%s\" %s %s", work, workdir, params, toplevel)) {
         fprintf(stderr, "[E] Compilation failed!");
         showMessage(MESSAGE_ERROR, "Error! Compilation failed.", NULL, NULL);
@@ -292,7 +292,7 @@ int vsim(int argc, char **argv)
                 fclose(fp);
             }
 
-            printf("Simulating...\n");
+            printf("[I] Simulating...\n");
             if (run_simulation("%s/%s --stop-time=%s --wave=%s.ghw", workdir, toplevel, simtime, toplevel)) {
                 fprintf(stderr, "[E] Simulation failed!");
                 showMessage(MESSAGE_ERROR, "Error! Simulation failed.", NULL, NULL);
@@ -383,7 +383,7 @@ int vcom(int argc, char **argv)
         fclose(fp);
     }
     else {
-        printf("Could not create temp file /tmp/model-ghdl-vcom! Ignoring...");
+        printf("[W] Could not create temp file /tmp/model-ghdl-vcom! Ignoring...");
     }
 
     run_ghdl("ghdl -i --work=%s --workdir=%s %s %s %s 2>&1",
