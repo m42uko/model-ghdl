@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+
 #include "gui.h"
 
 #ifndef PROGRAM_REVISION
@@ -25,7 +27,51 @@ int get_application(const char *call);
 int vsim(int argc, char **argv);
 int vcom(int argc, char **argv);
 int run_ghdl(char *command, ...);
+int run_simulation(char *command, ...);
+int run_gtkwave(char *toplevel, char *command, ...);
 char* append_string(char **dest, const char *src);
+pid_t system2(const char * command, int * infp, int * outfp);
+
+// Thanks GreenScape
+// http://stackoverflow.com/questions/22802902/how-to-get-pid-of-process-executed-with-system-command-in-c
+pid_t system2(const char * command, int * infp, int * outfp)
+{
+    int p_stdin[2];
+    int p_stdout[2];
+    pid_t pid;
+
+    if (pipe(p_stdin) == -1)
+        return -1;
+
+    if (pipe(p_stdout) == -1) {
+        close(p_stdin[0]);
+        close(p_stdin[1]);
+        return -1;
+    }
+
+    pid = fork();
+
+    if (pid < 0) {
+        close(p_stdin[0]);
+        close(p_stdin[1]);
+        close(p_stdout[0]);
+        close(p_stdout[1]);
+        return pid;
+    } else if (pid == 0) {
+        close(p_stdin[1]);
+        dup2(p_stdin[0], 0);
+        close(p_stdout[0]);
+        dup2(p_stdout[1], 1);
+        dup2(open("/dev/null", O_RDONLY), 2);
+        /// Close all other descriptors for the safety sake.
+        for (int i = 3; i < 4096; ++i)
+            close(i);
+
+        setsid();
+        execl("/bin/sh", "sh", "-c", command, NULL);
+        _exit(1);
+    }
+}
 
 int run_ghdl(char *command, ...) {
     FILE *proc;
@@ -42,7 +88,7 @@ int run_ghdl(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    printf("RUN: %s\n", cmd);
+    printf("RUN_GHDL: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -79,6 +125,83 @@ int run_ghdl(char *command, ...) {
     return pclose(proc);
 }
 
+int run_simulation(char *command, ...) {
+    FILE *proc;
+    char buf[1 K];
+    char cmd[1 K];
+
+    va_list argptr;
+    va_start(argptr, command);
+    vsprintf(cmd, command, argptr);
+    va_end(argptr);
+
+    printf("RUN_SIM: %s\n", cmd);
+    proc = popen(cmd, "r");
+
+    if (proc == NULL) {
+        printf("Error: Could not start the simulation.\n");
+        return 1;
+    }
+
+    while(fgets(buf, sizeof(buf), proc)!=NULL){
+        printf("** sim: %s", buf);
+    }
+    printf("\n");
+
+    return pclose(proc);
+}
+
+int run_gtkwave(char *toplevel, char *command, ...) {
+    FILE *fp;
+    pid_t pid;
+    char cmd[1 K];
+    char lockpath[1 K];
+    va_list argptr;
+
+    sprintf(lockpath, "/tmp/model-ghdl-gtkw-%s.lock", toplevel);
+
+    fp = fopen(lockpath,"r");
+    if (fp) {
+        fgets(cmd, sizeof(cmd), fp); // lets (ab)use the cmd variable here
+        pid = atoi(cmd);
+        fclose(fp);
+
+        if (kill(pid, 0)) { // Check if the process still lives
+            pid = -1;
+        }
+        else {
+            printf("GtkWave is already running.\n");
+        }
+    }
+    else {
+        pid = -1;
+    }
+
+    if (pid < 0) {
+        va_start(argptr, command);
+        vsprintf(cmd, command, argptr);
+        va_end(argptr);
+
+        printf("RUN_SIM: %s\n", cmd);
+
+        pid = system2(cmd, NULL, NULL);
+        printf("--> PID=%d\n", pid);
+
+        // Prevent gtkw from starting again each time
+        fp = fopen(lockpath,"w");
+        if (fp) {
+            fprintf(fp, "%d", pid);
+            fclose(fp);
+        }
+        else {
+            printf("Could not create temp file /tmp/model-ghdl-vcom! Ignoring...");
+        }
+    }
+
+    return 0;
+}
+
+
 int vsim(int argc, char **argv)
 {
     int ret;
@@ -94,6 +217,8 @@ int vsim(int argc, char **argv)
     char *simtime = NULL;
 
     FILE *fp;
+
+    append_string(&params,"");
 
     gui_init(&argc, &argv);
 
@@ -166,9 +291,18 @@ int vsim(int argc, char **argv)
                 fprintf(fp, "%s", simtime);
                 fclose(fp);
             }
+
             printf("Simulating...\n");
-            // TODO: Exec program
-            // TODO: Exec GtkWave
+            if (run_simulation("%s/%s --stop-time=%s --wave=%s.ghw", workdir, toplevel, simtime, toplevel)) {
+                fprintf(stderr, "[E] Simulation failed!");
+                showMessage(MESSAGE_ERROR, "Error! Simulation failed.", NULL, NULL);
+            }
+            else {
+                if (run_gtkwave(toplevel, "gtkwave %s/%s.ghw --save=\"%s.gtkw\"", workdir, toplevel, toplevel)) { // TODO: PATH FOR Savefile
+                    fprintf(stderr, "[E] Could not open GtkWave!");
+                    showMessage(MESSAGE_ERROR, "Error! Could not open GtkWave!", NULL, NULL);
+                }
+            }
         }
         return 0;
     }
