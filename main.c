@@ -139,7 +139,7 @@ int run_simulation(char *command, ...) {
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
-        printf("Error: Could not start the simulation.\n");
+        printf("[E] Could not start the simulation.\n");
         return 1;
     }
 
@@ -182,7 +182,7 @@ int run_gtkwave(char *toplevel, char *command, ...) {
         vsprintf(cmd, command, argptr);
         va_end(argptr);
 
-        printf("RUN_SIM: %s\n", cmd);
+        //printf("RUN_SIM: %s\n", cmd);
 
         pid = system2(cmd, NULL, NULL);
         //printf("--> PID=%d\n", pid);
