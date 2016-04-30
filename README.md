@@ -5,7 +5,7 @@ A wrapper for GHDL to make it look like Mentor's ModelSim. Helpful for use with 
 
 Compiling and use
 -----------------
-First install ghdl from [ghdl-updates](https://sourceforge.net/projects/ghdl-updates/). Model-ghdl expects to find the ghdl executable in the $PATH.
+First install ghdl from [github](https://github.com/tgingold/ghdl/) and install GtkWave. Model-ghdl expects to find the ghdl and gtkwave executables in the system $PATH.
 
 Then, to compile the wrapper, simply do the following:
 ```
@@ -14,7 +14,6 @@ cmake .
 make
 ```
 The five modelsim applications should now be present in the current folder as symlinks along with a model-ghdl binary. Either install these into your path or point your IDE to the location of the files.
-
 
 VCOM
 ----
@@ -28,7 +27,7 @@ VCOM
 
 ### Notes
 * *cwd* is expected to be the compile directory
-
+* Recommended arguments: -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
 
 VSIM
 ----
@@ -41,6 +40,7 @@ VSIM
 
 ### Notes
 * *cwd* is expected to be the source directory (used for .gtkw save path)
+* Recommended arguments: -gtkwprefix gtkwave/ -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
 
 
 VMAP
