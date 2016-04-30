@@ -316,6 +316,7 @@ int vsim(int argc, char **argv)
                     fprintf(stderr, "[E] Could not open GtkWave!");
                     showMessage(MESSAGE_ERROR, "Error! Could not open GtkWave!", NULL, NULL);
                 }
+                printf("[I] DONE.\n");
             }
         }
         return 0;
@@ -402,14 +403,14 @@ int vcom(int argc, char **argv)
     }
 
     run_ghdl("ghdl -i --work=%s --workdir=%s %s %s %s 2>&1",
-             work, workdir, vhdlver, files, params);
+             work, workdir, vhdlver, params, files);
     run_ghdl("ghdl -s --work=%s --workdir=%s %s %s %s 2>&1",
-             work, workdir, vhdlver, files, params);
+             work, workdir, vhdlver, params, files);
 
 
     free(files);
 
-    printf("DONE.\n");
+    printf("[I] DONE.\n");
     return 0;
 }
 
