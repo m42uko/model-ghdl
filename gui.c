@@ -16,7 +16,10 @@ int showMessage(int message_type, char *text, char *defaultText, char **reply) {
     GtkWidget *buttonBox;
     GtkWidget *mainBox;
     GtkWidget *label;
+    gboolean ret;
     char *entryText;
+
+    ret = true;
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "model-ghdl");
@@ -71,17 +74,18 @@ int showMessage(int message_type, char *text, char *defaultText, char **reply) {
     if (MESSAGE_IS_INPUT(message_type)) {
         entryText = (char*) gtk_entry_get_text(GTK_ENTRY(entry));
         if (entryText[0] == 0) {
-            return false;
+            ret = false;
         }
         else {
             *reply = realloc(*reply, sizeof(char)*strlen(entryText));
             if (*reply != NULL)
                 strcpy(*reply, entryText);
-            return true;
+            ret =  true;
         }
     }
 
     gtk_widget_destroy(window);
+    return ret;
 }
 
 static void okay( GtkWidget *widget,
