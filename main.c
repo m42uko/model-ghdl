@@ -423,7 +423,7 @@ char* append_string(char **dest, const char *src) {
         *dest[0] = 0;
     }
     else {
-        *dest = realloc(*dest, (strlen(*dest) + strlen(src)) * sizeof(char));
+        *dest = realloc(*dest, (strlen(*dest) + strlen(src) + 1) * sizeof(char));
     }
 
     strcat(*dest, src);
