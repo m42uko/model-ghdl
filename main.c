@@ -117,7 +117,7 @@ int run_ghdl(char *command, ...) {
         if (arrc == 4) {
             printf("** Error: %s(%s): (ghdl) %s", arr[0], arr[1], arr[3]);
         }
-        else if (arrc = 5) {
+        else if (arrc == 5) {
             printf("** Warning: %s(%s): (ghdl) %s", arr[0], arr[1], arr[4]);
         }
         else {
