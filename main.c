@@ -97,6 +97,7 @@ int run_ghdl(char *command, ...) {
     }
 
     // ../blink/src/top.vhd:32:19: no declaration for "counter_i2"
+    // ../blink/src/abc.vhd:12:14:warning: package "mypack" does not require a body
     //                            v
     // ** Error: /tmp/filename.vhd(32): (vcom-1136) Unknown identifier "counter_i2".
 
@@ -106,7 +107,7 @@ int run_ghdl(char *command, ...) {
         arrc = 0;
 
         do { // Search for EOL
-            if (arrc < 4 && (*ptr == ':' || *ptr == '\0')) {
+            if (arrc < 5 && (*ptr == ':' || *ptr == '\0')) {
                 *ptr++ = 0;
                 arr[arrc++] = start;
                 start = ptr;
@@ -115,6 +116,9 @@ int run_ghdl(char *command, ...) {
 
         if (arrc == 4) {
             printf("** Error: %s(%s): (ghdl) %s", arr[0], arr[1], arr[3]);
+        }
+        else if (arrc = 5) {
+            printf("** Warning: %s(%s): (ghdl) %s", arr[0], arr[1], arr[4]);
         }
         else {
             printf("** ghdl: %s", buf);
