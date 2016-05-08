@@ -217,6 +217,7 @@ int vsim(int argc, char **argv)
     char sourcedir[1 K];
     char *params = NULL;
     char *simtime = NULL;
+    char vhdlver[16] = "";
 
     FILE *fp;
 
@@ -242,6 +243,8 @@ int vsim(int argc, char **argv)
     fp = fopen("/tmp/model-ghdl-vcom","r");
     if (fp) {
         fgets(workdir, sizeof(workdir), fp);
+        workdir[strlen(workdir)-1] = 0;
+        fgets(vhdlver, sizeof(vhdlver), fp);
         fclose(fp);
     }
     else {
@@ -291,7 +294,7 @@ int vsim(int argc, char **argv)
     }
 
     printf("[I] Compiling...\n");
-    if (run_ghdl("ghdl -m --work=%s --workdir=\"%s\" %s %s", work, workdir, params, toplevel)) {
+    if (run_ghdl("ghdl -m %s --work=%s --workdir=\"%s\" %s %s", vhdlver, work, workdir, params, toplevel)) {
         fprintf(stderr, "[E] Compilation failed!");
         showMessage(MESSAGE_ERROR, "Error! Compilation failed.", NULL, NULL);
     }
@@ -395,7 +398,7 @@ int vcom(int argc, char **argv)
     // Info for vsim later on
     fp = fopen("/tmp/model-ghdl-vcom","w");
     if (fp) {
-        fprintf(fp, "%s", workdir);
+        fprintf(fp, "%s\n%s", workdir, vhdlver);
         fclose(fp);
     }
     else {
