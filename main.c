@@ -375,7 +375,7 @@ int vcom(int argc, char **argv)
             append_string(&params, argv[i]);
         }
         else if (argv[i][0] != '-'){ // VHDL file
-            slen += strlen(argv[i]) + 1;
+            slen += strlen(argv[i]) + 2;
             files = realloc(files, slen * sizeof(char));
             strcat(files, " ");
             strcat(files, argv[i]);
