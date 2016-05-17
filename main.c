@@ -78,10 +78,11 @@ int run_ghdl(char *command, ...) {
     char buf[1 K];
     char cmd[1 K];
 
-    char *arr[4];
+    char *arr[5];
     char *start;
     char *ptr;
     int arrc;
+    int fgetret;
 
     va_list argptr;
     va_start(argptr, command);
@@ -101,28 +102,47 @@ int run_ghdl(char *command, ...) {
     //                            v
     // ** Error: /tmp/filename.vhd(32): (vcom-1136) Unknown identifier "counter_i2".
 
-    while(fgets(buf, sizeof(buf), proc)!=NULL){
+    while(42){
+        ptr = buf - 1;
+
+
+        do { // TODO: Overflow protection!
+            ptr++;
+            *ptr = fgetc(proc);
+        } while (*ptr != '\0' && *ptr != '\n' && *ptr != -1);
+        if (*ptr == -1)
+            break;
+        *ptr = '\0';
+
         ptr = buf;
         start = buf;
         arrc = 0;
 
-        do { // Search for EOL
-            if (arrc < 5 && (*ptr == ':' || *ptr == '\0')) {
-                *ptr++ = 0;
+        do { // Split into params
+            if (*ptr == '(') {
                 arr[arrc++] = start;
+                break;
+            }
+            if (arrc < 5 && (*ptr == ':' || *ptr == '\0')) {
+                arr[arrc++] = start;
+                if (*ptr == '\0')
+                    break;
+                else
+                    *ptr++ = 0;
                 start = ptr;
             }
         } while (*ptr++ != '\0');
 
         if (arrc == 4) {
-            printf("** Error: %s(%s): (ghdl) %s", arr[0], arr[1], arr[3]);
+            printf("** Error: %s(%s): (ghdl) %s\n", arr[0], arr[1], arr[3]);
         }
         else if (arrc == 5) {
-            printf("** Warning: %s(%s): (ghdl) %s", arr[0], arr[1], arr[4]);
+            printf("** Warning: %s(%s): (ghdl) %s\n", arr[0], arr[1], arr[4]);
         }
         else {
-            printf("** ghdl: %s", buf);
+            printf("** ghdl: %s\n", buf);
         }
+        fflush(stdout);
     }
     printf("\n");
 
