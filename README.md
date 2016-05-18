@@ -9,7 +9,7 @@ First install ghdl from [github](https://github.com/tgingold/ghdl/) and install 
 
 Then, to compile the wrapper, simply do the following:
 ```
-git clone <git-url>
+git clone https://github.com/cclassic/model-ghdl
 cmake .
 make
 ```
@@ -27,7 +27,7 @@ VCOM
 
 ### Notes
 * *cwd* is expected to be the compile directory
-* Recommended arguments: -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
+* Recommended arguments: -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -frelaxed-rules -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
 
 VSIM
 ----
@@ -40,7 +40,7 @@ VSIM
 
 ### Notes
 * *cwd* is expected to be the source directory (used for .gtkw save path)
-* Recommended arguments: -gtkwprefix gtkwave/ -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
+* Recommended arguments: -gtkwprefix gtkwave/ -ghdl --ieee=synopsys -ghdl -fexplicit -ghdl -frelaxed-rules -ghdl -P[/path/to/lib](https://github.com/tgingold/ghdl/tree/master/libraries/vendors)
 
 
 VMAP
