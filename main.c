@@ -118,8 +118,9 @@ int run_ghdl(char *command, ...) {
         start = buf;
         arrc = 0;
 
+        //printf("** BUF: %s\n", buf);
         do { // Split into params
-            if (*ptr == '(') {
+            if (*ptr == ' ') {
                 arr[arrc++] = start;
                 break;
             }
@@ -144,7 +145,6 @@ int run_ghdl(char *command, ...) {
         }
         fflush(stdout);
     }
-    printf("\n");
 
     return pclose(proc);
 }
