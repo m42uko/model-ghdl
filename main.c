@@ -241,6 +241,8 @@ int vsim(int argc, char **argv)
     char sourcedir[1 K];
     char *params = NULL;
     char *simtime = NULL;
+    char *simExt = NULL;
+    char *outFileType = NULL;
     char vhdlver[16] = "";
 
     FILE *fp;
@@ -299,6 +301,9 @@ int vsim(int argc, char **argv)
             // free(ptr); DO NOT FREE, we still need it.
             // ptr = NULL;
         }
+        else if (GETOPT("-type")) {
+            append_string(&simExt, argv[i]);
+        }
         else if (GETOPT("-ghdl")) {
             append_string(&params, " ");
             append_string(&params, argv[i]);
@@ -309,6 +314,24 @@ int vsim(int argc, char **argv)
         else {
 
         }
+    }
+
+    if (simExt == NULL)
+        append_string(&simExt, "ghw");
+
+    if (!strcmp(simExt,"ghw")) {
+        append_string(&outFileType, "wave");
+    }
+    else if (!strcmp(simExt,"vcd")) {
+        append_string(&outFileType, "vcd");
+    }
+    else if (!strcmp(simExt,"fst")) {
+        append_string(&outFileType, "fst");
+    }
+    else {
+        fprintf(stderr, "[E] Unknown output file type!");
+        showMessage(MESSAGE_ERROR, "Error! Unknown output file type.", NULL, NULL);
+        return 127;
     }
 
     chdir(workdir);
@@ -334,12 +357,12 @@ int vsim(int argc, char **argv)
             }
 
             printf("[I] Simulating...\n");
-            if (run_simulation("%s/%s --stop-time=%s --wave=%s.ghw", workdir, toplevel, simtime, toplevel)) {
+            if (run_simulation("%s/%s --stop-time=%s --%s=%s.%s", workdir, toplevel, simtime, outFileType, toplevel, simExt)) {
                 fprintf(stderr, "[E] Simulation failed!");
                 showMessage(MESSAGE_ERROR, "Error! Simulation failed.", NULL, NULL);
             }
             else {
-                if (run_gtkwave(toplevel, "gtkwave %s/%s.ghw --save=\"%s/%s%s.gtkw\"", workdir, toplevel, sourcedir, gtkwPrefix, toplevel)) { // TODO: PATH FOR Savefile
+                if (run_gtkwave(toplevel, "gtkwave %s/%s.%s --save=\"%s/%s%s.gtkw\"", workdir, toplevel, simExt, sourcedir, gtkwPrefix, toplevel)) {
                     fprintf(stderr, "[E] Could not open GtkWave!");
                     showMessage(MESSAGE_ERROR, "Error! Could not open GtkWave!", NULL, NULL);
                 }

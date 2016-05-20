@@ -37,6 +37,7 @@ VSIM
 ### Additional commands
 * -ghdl *param*: Supply these arguments directly to GHDL (can be used multiple times)
 * -gtkwprefix *prefix*: Prefix for the .gtkw save file. Path will be $cwd/$prefix$toplevel.gtkw
+* -type *extension*: Set simulation output file type. Can be: ghw (default), vcd or fst
 
 ### Notes
 * *cwd* is expected to be the source directory (used for .gtkw save path)
