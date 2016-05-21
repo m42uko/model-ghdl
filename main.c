@@ -485,23 +485,20 @@ char* append_string(char **dest, const char *src) {
 
 int main(int argc, char **argv)
 {
-    int app;
-
     printf ("model-ghdl revision %s, compiled on %s.\n", PROGRAM_REVISION, __DATE__);
 
-    app = get_application(argv[0]);
-
-    if (app == PROG_VCOM) {
+    switch (get_application(argv[0])) {
+    case PROG_VCOM:
         return vcom(argc, argv);
-    }
-    else if (app == PROG_VSIM) {
+    case PROG_VSIM:
         return vsim(argc, argv);
-    }
-    else if (app == PROG_VMAP || app == PROG_VLIB || app == PROG_VDEL) {
+    case PROG_VMAP:
+    case PROG_VLIB:
+    case PROG_VDEL:
         return 0;
+    default:
+        return 255;
     }
-
-    return 255;
 }
 
 // Detects which function to call depending on the program name in argv[0]
