@@ -105,11 +105,10 @@ int run_ghdl(char *command, ...) {
     while(42){
         ptr = buf - 1;
 
-
-        do { // TODO: Overflow protection!
+        do {
             ptr++;
             *ptr = fgetc(proc);
-        } while (*ptr != '\0' && *ptr != '\n' && *ptr != -1);
+        } while (*ptr != '\0' && *ptr != '\n' && *ptr != -1 && ptr < buf + sizeof(buf));
         if (*ptr == -1)
             break;
         *ptr = '\0';
