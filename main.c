@@ -82,7 +82,7 @@ int run_ghdl(char *command, ...) {
     char *start;
     char *ptr;
     int arrc;
-    int fgetret;
+    int i;
 
     va_list argptr;
     va_start(argptr, command);
@@ -141,7 +141,11 @@ int run_ghdl(char *command, ...) {
             printf("** Warning: %s(%s): (ghdl) %s\n", arr[0], arr[1], arr[4]);
         }
         else {
-            printf("** ghdl: %s\n", buf);
+            printf("** ghdl: ");
+            for (i = 0; i < arrc; i++) {
+                printf("%s", arr[i]);
+            }
+            printf("\n");
         }
         fflush(stdout);
     }
