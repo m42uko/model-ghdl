@@ -24,6 +24,7 @@ VCOM
 
 ### Additional commands
 * -ghdl *param*: Supply these arguments directly to GHDL (can be used multiple times)
+* -no-precompile: Compile the files not until calling vsim. (Faster syntax check, but longer wait time for the simulation to start.)
 
 ### Notes
 * *cwd* is expected to be the compile directory

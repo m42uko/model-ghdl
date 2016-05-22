@@ -247,7 +247,7 @@ int vsim(int argc, char **argv)
     char *simExt = NULL;
     char *outFileType = NULL;
     char vhdlver[16] = "";
-
+    int precompiled = 1;
     FILE *fp;
 
     append_string(&params,"");
@@ -271,6 +271,9 @@ int vsim(int argc, char **argv)
 
     fp = fopen("/tmp/model-ghdl-vcom","r");
     if (fp) {
+        fgets(workdir, sizeof(workdir), fp); // (ab)use workdir variable as temp
+        if (!strcmp(workdir,"nopre\n"))
+            precompiled = 0;
         fgets(workdir, sizeof(workdir), fp);
         workdir[strlen(workdir)-1] = 0;
         fgets(vhdlver, sizeof(vhdlver), fp);
@@ -344,7 +347,7 @@ int vsim(int argc, char **argv)
     }
 
     printf("[I] Compiling...\n");
-    if (run_ghdl("ghdl -m %s --work=%s --workdir=\"%s\" %s %s", vhdlver, work, workdir, params, toplevel)) {
+    if (run_ghdl("ghdl -%c %s --work=%s --workdir=\"%s\" %s %s", (precompiled ? 'e' : 'm'), vhdlver, work, workdir, params, toplevel)) {
         fprintf(stderr, "[E] Compilation failed!");
         showMessage(MESSAGE_ERROR, "Error! Compilation failed.", NULL, NULL);
     }
@@ -390,6 +393,7 @@ int vcom(int argc, char **argv)
     char *files = NULL;
     char vhdlver[16] = "";
     FILE *fp = NULL;
+    int precompile = 1;
 
     printf ("[I] Emulating vcom.\n");
 
@@ -423,6 +427,9 @@ int vcom(int argc, char **argv)
         else if (ISOPT("-2008")) {
             strcpy(vhdlver, "--std=08");
         }
+        else if (ISOPT("-no-precompile")) {
+            precompile = 0;
+        }
         else if (GETOPT("-ghdl")) {
             append_string(&params, " ");
             append_string(&params, argv[i]);
@@ -448,7 +455,7 @@ int vcom(int argc, char **argv)
     // Info for vsim later on
     fp = fopen("/tmp/model-ghdl-vcom","w");
     if (fp) {
-        fprintf(fp, "%s\n%s", workdir, vhdlver);
+        fprintf(fp, "%s\n%s\n%s", (precompile ? "pre" : "nopre"), workdir, vhdlver);
         fclose(fp);
     }
     else {
@@ -457,9 +464,8 @@ int vcom(int argc, char **argv)
 
     run_ghdl("ghdl -i --work=%s --workdir=%s %s %s %s 2>&1",
              work, workdir, vhdlver, params, files);
-    run_ghdl("ghdl -s --work=%s --workdir=%s %s %s %s 2>&1",
-             work, workdir, vhdlver, params, files);
-
+    run_ghdl("ghdl -%c --work=%s --workdir=%s %s %s %s 2>&1",
+             (precompile ? 'a' : 's'), work, workdir, vhdlver, params, files);
 
     free(files);
 
