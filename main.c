@@ -22,7 +22,7 @@
 #define ISOPT(cmd)  (strcmp(argv[i], cmd) == 0)
 #define GETOPT(cmd) (strcmp(argv[i], cmd) == 0) && (++i < argc)
 
-const char *laststrstr (const char *__haystack, const char *__needle);
+const char *getAfter (const char *__haystack, const char *__needle);
 int get_application(const char *call);
 int vsim(int argc, char **argv);
 int vcom(int argc, char **argv);
@@ -89,7 +89,7 @@ int run_ghdl(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    //printf("RUN_GHDL: %s\n", cmd);
+    printf("RUN_GHDL: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -162,7 +162,7 @@ int run_simulation(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    //printf("RUN_SIM: %s\n", cmd);
+    printf("RUN_SIM: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -510,7 +510,7 @@ int main(int argc, char **argv)
 // Detects which function to call depending on the program name in argv[0]
 int get_application(const char *call) {
     char *pos;
-    pos = (char*) laststrstr(call, "/") + 1;
+    pos = (char*) getAfter(call, "/");
     if (strcmp(pos, "vcom") == 0) {
         return PROG_VCOM;
     }
@@ -533,14 +533,16 @@ int get_application(const char *call) {
 }
 
 // Returns the string after the last occurence of __needle
-const char *laststrstr (const char *__haystack, const char *__needle) {
+const char *getAfter (const char *__haystack, const char *__needle) {
     char *pos, *realPos;
     char *haystack;
     haystack = (char*) __haystack;
     pos = (char*) __haystack;
     while (pos != NULL) {
-        realPos = pos;
+        realPos = pos + 1;
         pos = strstr(haystack, __needle);
+        if (haystack == __haystack && pos == NULL) // If no __needle is present at all...
+            realPos = (char*) __haystack; // Return the entire string
         haystack = pos + 1;
     }
     return realPos;
