@@ -8,6 +8,8 @@
 #define PROGRAM_REVISION "#unknown"
 #endif
 
+//#define DEBUG_ENABLED DEBUG_ENABLED
+
 #define PROG_VCOM 0
 #define PROG_VSIM 1
 #define PROG_VLIB 2
@@ -31,6 +33,18 @@ int run_simulation(char *command, ...);
 int run_gtkwave(char *toplevel, char *command, ...);
 char* append_string(char **dest, const char *src);
 pid_t system2(const char * command, int * infp, int * outfp);
+void debug( const char* format, ... );
+
+void debug( const char* format, ... ) {
+#ifdef DEBUG_ENABLED
+    va_list args;
+    // fprintf( stderr, "[D] " );
+    va_start( args, format );
+    vfprintf( stderr, format, args );
+    va_end( args );
+    // fprintf( stderr, "\n" );
+#endif
+}
 
 // Thanks GreenScape
 // http://stackoverflow.com/questions/22802902/how-to-get-pid-of-process-executed-with-system-command-in-c
@@ -89,7 +103,7 @@ int run_ghdl(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    printf("RUN_GHDL: %s\n", cmd);
+    debug("RUN_GHDL: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -162,7 +176,7 @@ int run_simulation(char *command, ...) {
     vsprintf(cmd, command, argptr);
     va_end(argptr);
 
-    printf("RUN_SIM: %s\n", cmd);
+    debug("RUN_SIM: %s\n", cmd);
     proc = popen(cmd, "r");
 
     if (proc == NULL) {
@@ -209,10 +223,10 @@ int run_gtkwave(char *toplevel, char *command, ...) {
         vsprintf(cmd, command, argptr);
         va_end(argptr);
 
-        //printf("RUN_SIM: %s\n", cmd);
+        debug("RUN_GTKWAVE: %s\n", cmd);
 
         pid = system2(cmd, NULL, NULL);
-        //printf("--> PID=%d\n", pid);
+        //debug("--> PID=%d\n", pid);
 
         // Prevent gtkw from starting again each time
         fp = fopen(lockpath,"w");
