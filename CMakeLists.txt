@@ -22,3 +22,6 @@ add_custom_command(
     COMMAND ln -sf ${PROJECT_NAME} vdel
     COMMAND ln -sf ${PROJECT_NAME} vlib
 )
+
+install (TARGETS model-ghdl DESTINATION bin)
+install (FILES vsim vcom vmap vdel vlib DESTINATION bin)
