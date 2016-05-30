@@ -1,0 +1,33 @@
+# Maintainer: Markus Koch <CClassicVideos@aol.com>
+
+pkgname=model-ghdl
+pkgver=8c5bdd7
+pkgrel=1
+pkgdesc='A wrapper for ghdl to make it look like modelsim.'
+arch=('i686' 'x86_64')
+url='https://github.com/cclassic/model-ghdl'
+license=('GPL')
+depends=('gtk3')
+makedepends=('cmake' 'git')
+source=("model-ghdl::git://github.com/cclassic/model-ghdl.git")
+sha1sums=('SKIP')
+
+pkgver() {
+  echo $(git log |head -n 1|sed "s/.* //g" | head -c 7)
+}
+
+build() {
+  cd "$srcdir/model-ghdl"
+
+  cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .
+  #-DCMAKE_C_FLAGS=-DPROGRAM_REVISION="#${pkgver}";
+
+  make
+}
+
+package() {
+  cd "$srcdir/model-ghdl"
+
+  make DESTDIR="${pkgdir}" install
+}
+
