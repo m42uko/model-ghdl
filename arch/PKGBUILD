@@ -1,7 +1,7 @@
 # Maintainer: Markus Koch <CClassicVideos@aol.com>
 
 pkgname=model-ghdl
-pkgver=8c5bdd7
+pkgver=cee0976
 pkgrel=1
 pkgdesc='A wrapper for ghdl to make it look like modelsim.'
 arch=('i686' 'x86_64')
@@ -13,6 +13,7 @@ source=("model-ghdl::git://github.com/cclassic/model-ghdl.git")
 sha1sums=('SKIP')
 
 pkgver() {
+  cd "$srcdir/model-ghdl"
   echo $(git log |head -n 1|sed "s/.* //g" | head -c 7)
 }
 
