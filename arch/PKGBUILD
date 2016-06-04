@@ -1,7 +1,7 @@
 # Maintainer: Markus Koch <CClassicVideos@aol.com>
 
 pkgname=model-ghdl
-pkgver=cee0976
+pkgver=59.cee0976
 pkgrel=1
 pkgdesc='A wrapper for ghdl to make it look like modelsim.'
 arch=('i686' 'x86_64')
@@ -14,7 +14,8 @@ sha1sums=('SKIP')
 
 pkgver() {
   cd "$srcdir/model-ghdl"
-  echo $(git log |head -n 1|sed "s/.* //g" | head -c 7)
+  echo -n $(git log|grep -e ^commit|wc -l).
+  echo $(git log | head -n 1 | sed "s/.* //g" | head -c 7)
 }
 
 build() {
