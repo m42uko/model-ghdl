@@ -67,7 +67,7 @@ int showMessage(int message_type, char *text, char *defaultText, char **reply) {
 	gtk_container_add(GTK_CONTAINER(window), mainBox);
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 	gtk_window_set_default_size(GTK_WINDOW(window), 320, 10);
-	gtk_window_present(window);
+	gtk_window_present(GTK_WINDOW(window));
 
 	gtk_main();
 
