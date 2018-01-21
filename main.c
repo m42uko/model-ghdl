@@ -400,7 +400,6 @@ int vsim(int argc, char **argv)
 int vcom(int argc, char **argv)
 {
 	int i;
-	int slen = 0;
 	char workdir[1 K];
 	char *params = NULL;
 	char *work = NULL;
@@ -449,10 +448,8 @@ int vcom(int argc, char **argv)
 			append_string(&params, argv[i]);
 		}
 		else if (argv[i][0] != '-'){ // VHDL file
-			slen += strlen(argv[i]) + 2;
-			files = realloc(files, slen * sizeof(char));
-			strcat(files, " ");
-			strcat(files, argv[i]);
+			append_string(&files, " ");
+			append_string(&files, argv[i]);
 		}
 	}
 
