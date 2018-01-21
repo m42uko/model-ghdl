@@ -13,7 +13,7 @@ int gui_init(int *argc, char ***argv);
 int showMessage(int message_type, char *text, char *defaultText, char **reply);
 
 // Slots
-static void okay( GtkWidget *widget, gpointer data );
-static void cancel ( GtkWidget *widget, gpointer data );
+static void okay(GtkWidget *widget, gpointer data);
+static void cancel(GtkWidget *widget, gpointer data);
 
 #endif // GUI_H
